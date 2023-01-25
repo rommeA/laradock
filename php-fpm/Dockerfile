@@ -816,6 +816,9 @@ RUN if [ ${INSTALL_IMAGEMAGICK} = true ]; then \
     php -m | grep -q 'imagick' \
 ;fi
 
+ARG imagemagic_config=/etc/ImageMagick-6/policy.xml
+RUN if [ -f $imagemagic_config ] ; then sed -i 's/<policy domain="coder" rights="none" pattern="PDF" \/>/<policy domain="coder" rights="read|write" pattern="PDF" \/>/g' $imagemagic_config ; else echo did not see file $imagemagic_config ; fi
+
 ###########################################################################
 # SMB:
 ###########################################################################
@@ -1037,23 +1040,39 @@ USER root
 ARG INSTALL_WKHTMLTOPDF=false
 ARG WKHTMLTOPDF_VERSION=0.12.6-1
 
+#RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
+#    ARCH=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) \
+#    && apt-get install -yqq \
+#      libxrender1 \
+#      libfontconfig1 \
+#      libx11-dev \
+#      libjpeg62 \
+#      libxtst6 \
+#      fontconfig \
+#      libjpeg62-turbo \
+#      xfonts-base \
+#      xfonts-75dpi \
+#      wget \
+#    && wget "https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOPDF_VERSION}/wkhtmltox_0.12.6-1.stretch_${ARCH}.deb" \
+#    && dpkg -i "wkhtmltox_${WKHTMLTOPDF_VERSION}.stretch_${ARCH}.deb" \
+#    && apt -f install \
+#;fi
+
+#####################################
+# wkhtmltopdf:
+#####################################
+
+ARG INSTALL_WKHTMLTOPDF=false
 RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
-    ARCH=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) \
-    && apt-get install -yqq \
-      libxrender1 \
-      libfontconfig1 \
-      libx11-dev \
-      libjpeg62 \
-      libxtst6 \
-      fontconfig \
-      libjpeg62-turbo \
-      xfonts-base \
-      xfonts-75dpi \
-      wget \
-    && wget "https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOPDF_VERSION}/wkhtmltox_0.12.6-1.stretch_${ARCH}.deb" \
-    && dpkg -i "wkhtmltox_${WKHTMLTOPDF_VERSION}.stretch_${ARCH}.deb" \
-    && apt -f install \
-;fi
+     apt-get update && apt-get install -y libxrender1 libfontconfig1 libx11-dev libjpeg62 libxtst6  wget \
+     && mkdir wkhtmltopdf_download \
+     && cd wkhtmltopdf_download \
+     && wget "https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.stretch_amd64.deb" \
+     && apt install ./wkhtmltox_0.12.5-1.stretch_amd64.deb -y \
+     && cd .. \
+     && rm -rf wkhtmltopdf_download \
+ ;fi
+
 
 #####################################
 # trader:
