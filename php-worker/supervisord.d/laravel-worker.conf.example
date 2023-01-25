@@ -5,8 +5,10 @@ autostart=true
 autorestart=true
 stopasgroup=true
 killasgroup=true
-user=folder renamed
+user=laradock
 numprocs=8
 redirect_stderr=true
 stdout_logfile=/var/www/storage/logs/queue.log
 stopwaitsecs=3600
+
+
