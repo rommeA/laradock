@@ -350,6 +350,8 @@ services:
       networks:
         - frontend
         - backend
+      dns:
+        - 10.10.25.9
 
 ### PostgreSQL ###########################################
     postgres:
