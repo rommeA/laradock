@@ -8,9 +8,9 @@ networks:
 volumes:
   mysql:
     driver: ${VOLUMES_DRIVER}
-  postgres:
+  postgres_v:
     driver: ${VOLUMES_DRIVER}
-  docker-in-docker:
+  docker-in-docker_v:
     driver: ${VOLUMES_DRIVER}
 
 services:
