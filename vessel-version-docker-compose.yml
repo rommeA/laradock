@@ -1,24 +1,24 @@
 version: '3.5'
 
 networks:
-  frontend:
+  frontend_v:
     driver: ${NETWORKS_DRIVER}
-  backend:
+  backend_v:
     driver: ${NETWORKS_DRIVER}
 volumes:
-  mysql_v:
+  mysql:
     driver: ${VOLUMES_DRIVER}
-  postgres_v:
+  postgres:
     driver: ${VOLUMES_DRIVER}
-  docker-in-docker_v:
+  docker-in-docker:
     driver: ${VOLUMES_DRIVER}
 
 services:
 
 ### Workspace Utilities ##################################
-    workspace_v:
+    workspace:
       build:
-        context: ./workspace_v
+        context: ./workspace
         args:
           - CHANGE_SOURCE=${CHANGE_SOURCE}
           - SHELL_OH_MY_ZSH=${SHELL_OH_MY_ZSH}
@@ -160,15 +160,15 @@ services:
         - DOCKER_CERT_PATH=/certs/client
         - CHOKIDAR_USEPOLLING=true
       networks:
-        - frontend
-        - backend
+        - frontend_v
+        - backend_v
       links:
-        - docker-in-docker_v
+        - docker-in-docker
 
 ### PHP-FPM ##############################################
-    php-fpm_v:
+    php-fpm:
       build:
-        context: ./php-fpm_v
+        context: ./php-fpm
         args:
           - CHANGE_SOURCE=${CHANGE_SOURCE}
           - BASE_IMAGE_TAG_PREFIX=${PHP_FPM_BASE_IMAGE_TAG_PREFIX}
@@ -270,16 +270,16 @@ services:
         - DOCKER_CERT_PATH=/certs/client
         - FAKETIME=${PHP_FPM_FAKETIME}
       depends_on:
-        - workspace_v
+        - workspace
       networks:
-        - backend
+        - backend_v
       links:
-        - docker-in-docker_v
+        - docker-in-docker
 
 ### PHP Worker ############################################
-    php-worker_v:
+    php-worker:
       build:
-        context: ./php-worker_v
+        context: ./php-worker
         args:
           - CHANGE_SOURCE=${CHANGE_SOURCE}
           - LARADOCK_PHP_VERSION=${PHP_VERSION}
@@ -322,16 +322,16 @@ services:
         - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
         - ./php-worker/supervisord.d:/etc/supervisord.d
       depends_on:
-        - workspace_v
+        - workspace
       extra_hosts:
         - "dockerhost:${DOCKER_HOST_IP}"
       networks:
-        - backend
+        - backend_v
 
 ### NGINX Server #########################################
-    nginx_v:
+    nginx:
       build:
-        context: ./nginx_v
+        context: ./nginx
         args:
           - CHANGE_SOURCE=${CHANGE_SOURCE}
           - PHP_UPSTREAM_CONTAINER=${NGINX_PHP_UPSTREAM_CONTAINER}
@@ -346,13 +346,13 @@ services:
         - "${NGINX_HOST_HTTP_PORT}:80"
         - "${VARNISH_BACKEND_PORT}:81"
       depends_on:
-        - php-fpm_v
+        - php-fpm
       networks:
-        - frontend
-        - backend
+        - frontend_v
+        - backend_v
 
 ### PostgreSQL ###########################################
-    postgres_v:
+    postgres:
       image: 'dalred/postgres-uuid:version-1'
 #      volumes:
 #        - ${DATA_PATH_HOST}/postgres:/var/lib/postgresql/data
@@ -380,10 +380,10 @@ services:
         - POSTGRES_CONFLUENCE_USER=${CONFLUENCE_POSTGRES_USER}
         - POSTGRES_CONFLUENCE_PASSWORD=${CONFLUENCE_POSTGRES_PASSWORD}
       networks:
-        - backend
+        - backend_v
 
 ### pgAdmin ##############################################
-    pgadmin_v:
+    pgadmin:
       image: dpage/pgadmin4:latest
       environment:
         - "PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}"
@@ -393,33 +393,33 @@ services:
       volumes:
         - ${DATA_PATH_HOST}/pgadmin:/var/lib/pgadmin
       depends_on:
-        - postgres_v
+        - postgres
       networks:
-        - frontend
-        - backend
+        - frontend_v
+        - backend_v
 
 
 ### Docker-in-Docker ################################################
-    docker-in-docker_v:
+    docker-in-docker:
       image: docker:20.10-dind
       environment:
-        DOCKER_TLS_SAN: DNS:docker-in-docker_v
+        DOCKER_TLS_SAN: DNS:docker-in-docker
       privileged: true
       volumes:
         - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}
-        - docker-in-docker_v:/certs/client
+        - docker-in-docker:/certs/client
       expose:
         - 2375
       networks:
-        - backend
+        - backend_v
 
   ### Mailhog ################################################
-    mailhog_v:
-      build: ./mailhog_v
+    mailhog:
+      build: ./mailhog
       ports:
-        - "1026:1025"
-        - "8026:8025"
+        - "1025:1025"
+        - "8025:8025"
       networks:
-        - frontend
-        - backend
+        - frontend_v
+        - backend_v
 
