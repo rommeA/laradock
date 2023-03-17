@@ -418,7 +418,7 @@ services:
       build: ./mailhog
       ports:
         - "1025:1025"
-        - "8025:8025"
+        - "8026:8025"
       networks:
         - frontend_v
         - backend_v
