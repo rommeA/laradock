@@ -8,9 +8,9 @@ networks:
 volumes:
   mysql:
     driver: ${VOLUMES_DRIVER}
-  postgres_v:
+  postgres:
     driver: ${VOLUMES_DRIVER}
-  docker-in-docker_v:
+  docker-in-docker:
     driver: ${VOLUMES_DRIVER}
 
 services:
@@ -403,11 +403,11 @@ services:
     docker-in-docker_v:
       image: docker:20.10-dind
       environment:
-        DOCKER_TLS_SAN: DNS:docker-in-docker
+        DOCKER_TLS_SAN: DNS:docker-in-docker_v
       privileged: true
       volumes:
         - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}
-        - docker-in-docker:/certs/client
+        - docker-in-docker_v:/certs/client
       expose:
         - 2375
       networks:
