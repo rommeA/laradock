@@ -270,7 +270,7 @@ services:
         - DOCKER_CERT_PATH=/certs/client
         - FAKETIME=${PHP_FPM_FAKETIME}
       depends_on:
-        - workspace
+        - workspace_v
       networks:
         - backend
       links:
@@ -322,7 +322,7 @@ services:
         - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
         - ./php-worker/supervisord.d:/etc/supervisord.d
       depends_on:
-        - workspace
+        - workspace_v
       extra_hosts:
         - "dockerhost:${DOCKER_HOST_IP}"
       networks:
