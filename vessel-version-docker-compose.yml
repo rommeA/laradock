@@ -18,7 +18,7 @@ services:
 ### Workspace Utilities ##################################
     workspace_v:
       build:
-        context: ./workspace
+        context: ./workspace_v
         args:
           - CHANGE_SOURCE=${CHANGE_SOURCE}
           - SHELL_OH_MY_ZSH=${SHELL_OH_MY_ZSH}
@@ -168,7 +168,7 @@ services:
 ### PHP-FPM ##############################################
     php-fpm_v:
       build:
-        context: ./php-fpm
+        context: ./php-fpm_v
         args:
           - CHANGE_SOURCE=${CHANGE_SOURCE}
           - BASE_IMAGE_TAG_PREFIX=${PHP_FPM_BASE_IMAGE_TAG_PREFIX}
@@ -279,7 +279,7 @@ services:
 ### PHP Worker ############################################
     php-worker_v:
       build:
-        context: ./php-worker
+        context: ./php-worker_v
         args:
           - CHANGE_SOURCE=${CHANGE_SOURCE}
           - LARADOCK_PHP_VERSION=${PHP_VERSION}
@@ -331,7 +331,7 @@ services:
 ### NGINX Server #########################################
     nginx_v:
       build:
-        context: ./nginx
+        context: ./nginx_v
         args:
           - CHANGE_SOURCE=${CHANGE_SOURCE}
           - PHP_UPSTREAM_CONTAINER=${NGINX_PHP_UPSTREAM_CONTAINER}
@@ -415,9 +415,9 @@ services:
 
   ### Mailhog ################################################
     mailhog_v:
-      build: ./mailhog
+      build: ./mailhog_v
       ports:
-        - "1025:1025"
+        - "1026:1025"
         - "8026:8025"
       networks:
         - frontend
