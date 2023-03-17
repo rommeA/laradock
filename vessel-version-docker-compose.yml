@@ -6,11 +6,11 @@ networks:
   backend:
     driver: ${NETWORKS_DRIVER}
 volumes:
-  mysql:
+  mysql_v:
     driver: ${VOLUMES_DRIVER}
-  postgres:
+  postgres_v:
     driver: ${VOLUMES_DRIVER}
-  docker-in-docker:
+  docker-in-docker_v:
     driver: ${VOLUMES_DRIVER}
 
 services:
