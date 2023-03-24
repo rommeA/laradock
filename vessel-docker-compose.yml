@@ -13,7 +13,7 @@ volumes:
   docker-in-docker:
     driver: ${VOLUMES_DRIVER}
 
-  -  /var/www/femco.ru/pipe_test:/hostpipe
+  - /var/www/femco.ru/pipe_test:/hostpipe
 
 services:
 
