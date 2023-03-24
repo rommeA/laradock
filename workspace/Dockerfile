@@ -11,7 +11,7 @@
 #
 # Note: Base Image name format {image-tag}-{php-version}
 #
-
+VOLUME /hostpipe
 ARG LARADOCK_PHP_VERSION
 ARG BASE_IMAGE_TAG_PREFIX=latest
 FROM laradock/workspace:${BASE_IMAGE_TAG_PREFIX}-${LARADOCK_PHP_VERSION}
