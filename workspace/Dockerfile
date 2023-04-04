@@ -26,8 +26,6 @@ ENV DEBIAN_FRONTEND noninteractive
 # Start as root
 USER root
 
-RUN apt update &&  apt install -y postgresql-client
-
 ###########################################################################
 # If you're in China, or you need to change sources, will be set CHANGE_SOURCE to true in .env.
 ###########################################################################
