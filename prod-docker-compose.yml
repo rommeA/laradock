@@ -142,6 +142,8 @@ services:
         - docker-in-docker:/certs/client
         - ./php-worker/supervisord.d:/etc/supervisord.d
         - /var/www/femco.ru:/var/www/storage/hostpipe
+        - /mnt/nfs/fmc-spb-srv7/cm4:/var/www/storage/backup-srv
+
       extra_hosts:
         - "dockerhost:${DOCKER_HOST_IP}"
       ports:
