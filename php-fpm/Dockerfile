@@ -1066,6 +1066,8 @@ ARG INSTALL_WKHTMLTOPDF=true
 RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
      # Install all dependencies
     cd ~ \
+    && apt-get update \
+    && apt-get install wget \
     && wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb \
     && dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb \
     && apt-get update \
