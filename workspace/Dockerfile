@@ -1445,7 +1445,7 @@ RUN if [ ${INSTALL_AUDIOWAVEFORM} = true ]; then \
 
 USER root
 
-# ARG INSTALL_WKHTMLTOPDF=false
+ARG INSTALL_WKHTMLTOPDF=false
 ARG WKHTMLTOPDF_VERSION=0.12.6-1
 
 #RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
@@ -1475,18 +1475,14 @@ ARG WKHTMLTOPDF_VERSION=0.12.6-1
 ARG INSTALL_WKHTMLTOPDF=true
 RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
      # Install all dependencies
-    cd ~ \
-    && wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb \
-    && dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb \
-    && apt-get update \
-    && apt-get install libfontenc1 xfonts-75dpi xfonts-base xfonts-encodings xfonts-utils openssl build-essential libssl-dev libxrender-dev git-core libx11-dev libxext-dev libfontconfig1-dev libfreetype6-dev fontconfig -y \
-    && wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb \
-    && dpkg -i wkhtmltox_0.12.5-1.bionic_amd64.deb \
-    && apt --fix-broken install \
+     apt-get update && apt-get install -y libxrender1 libfontconfig1 libx11-dev libjpeg62 libxtst6 wget \
+     && mkdir wkhtmltopdf_download \
+     && cd wkhtmltopdf_download \
+     && wget "https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb" \
+     && apt install ./wkhtmltox_0.12.5-1.bionic_amd64.deb -y \
+     && cd .. \
+     && rm -rf wkhtmltopdf_download \
  ;fi
-
-
- 
 
 
 #RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
