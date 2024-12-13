@@ -612,6 +612,8 @@ services:
 
 ### PostgreSQL ###########################################
     postgres:
+      sysctls:
+        - kernel.shmmax=17179869184
       build:
         context: ./postgres
         args:
