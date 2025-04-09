@@ -1289,12 +1289,12 @@ USER root
 ARG INSTALL_PG_CLIENT=false
 
 RUN if [ ${INSTALL_PG_CLIENT} = true ]; then \
-    # Install the pgsql client
-    apt-get -yqq install wget \
-    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
-    && echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
-    && apt-get update \
-    && apt-get -y install postgresql-client-14 \
+    apt-get update && \
+    apt-get -y install wget gnupg && \
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
+    echo "deb http://apt.postgresql.org/pub/repos/apt/ bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list && \
+    apt-get update && \
+    apt-get -y install postgresql-client-14 \
 ;fi
 
 ###########################################################################
