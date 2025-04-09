@@ -1463,7 +1463,7 @@ RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
    xfonts-75dpi \
    wget \
    && wget "https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb" \
-   && dpkg -i "wkhtmltox_${WKHTMLTOPDF_VERSION}.focal_${ARCH}.deb" \
+   && dpkg -i "wkhtmltox_0.12.6-1.focal_amd64.deb" \
    && apt -f install \
 ;fi
 
