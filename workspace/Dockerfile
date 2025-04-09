@@ -1446,72 +1446,40 @@ RUN if [ ${INSTALL_AUDIOWAVEFORM} = true ]; then \
 USER root
 
 ARG INSTALL_WKHTMLTOPDF=false
-ARG WKHTMLTOPDF_VERSION=0.12.6-1
+ARG WKHTMLTOPDF_VERSION=0.12.6.1-3
 
-#RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
-#   ARCH=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) \
-#   && apt-get install -y \
-#   libxrender1 \
-#   libfontconfig1 \
-#   libx11-dev \
-#   libjpeg62 \
-#   libxtst6 \
-#   fontconfig \
-#   libjpeg-turbo8-dev \
-#   xfonts-base \
-#   xfonts-75dpi \
-#   wget \
-#   && wget "https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOPDF_VERSION}/wkhtmltox_0.12.6-1.bionic_${ARCH}.deb" \
-#   && dpkg -i "wkhtmltox_${WKHTMLTOPDF_VERSION}.bionic_${ARCH}.deb" \
-#   && apt -f install \
-#;fi
-
-
-#####################################
-# wkhtmltopdf:
-#####################################
- USER root
-
-ARG INSTALL_WKHTMLTOPDF=true
 RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
-     # Install all dependencies
-     apt-get update && apt-get install -y libxrender1 libfontconfig1 libx11-dev libjpeg62 libxtst6 wget \
-     && mkdir wkhtmltopdf_download \
-     && cd wkhtmltopdf_download \
-     && wget "https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb" \
-     && apt install ./wkhtmltox_0.12.5-1.bionic_amd64.deb -y \
-     && cd .. \
-     && rm -rf wkhtmltopdf_download \
- ;fi
-
-
-#RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
-#   apt-get install -y \
-#   libfontenc1  \
-#   xfonts-75dpi \
-#   xfonts-base \
-#   xfonts-encodings \
-#   xfonts-utils \
-#   openssl \
-#   build-essential \
-#   libssl-dev \
-#   libxrender-dev \
-#   git-core \
-#   libx11-dev \
-#   libxext-dev \
-#   libfontconfig1-dev \
-#   libfreetype6-dev \
-#   fontconfig \
-#   wget \
-##    && wget -q "http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb" \
-##    && dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb \
-##    && apt --fix-broken install \
-#    && wget -q "https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb" \
-#   && dpkg -i "wkhtmltox_0.12.5-1.bionic_amd64.deb" \
-#    && apt --fix-broken install \
-#    && apt -f install \
-#;fi
-
+    ARCH=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) \
+    && apt-get install -yqq \
+      libxrender1 \
+      libfontconfig1 \
+      libx11-dev \
+      libjpeg62 \
+      libxtst6 \
+      fontconfig \
+      libjpeg62-turbo \
+      xfonts-base \
+      xfonts-75dpi \
+      wget \
+    # && cat /etc/os-release \
+    && if [ ${LARADOCK_PHP_VERSION} = "5.6" ] || \
+        [ ${LARADOCK_PHP_VERSION} = "7.0" ]; then \
+      wget "https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.stretch_${ARCH}.deb"; \
+      dpkg -i "wkhtmltox_0.12.6-1.stretch_${ARCH}.deb"; \
+    elif [ ${LARADOCK_PHP_VERSION} = "7.1" ] || \
+        [ ${LARADOCK_PHP_VERSION} = "7.2" ] || \
+        [ ${LARADOCK_PHP_VERSION} = "7.3" ] || \
+        [ ${LARADOCK_PHP_VERSION} = "7.4" ]; then \
+      wget "https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_${ARCH}.deb"; \
+      dpkg -i "wkhtmltox_0.12.6-1.buster_${ARCH}.deb"; \
+    elif [ ${LARADOCK_PHP_VERSION} = "8.0" ]; then \
+      wget "https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOPDF_VERSION}/wkhtmltox_${WKHTMLTOPDF_VERSION}.bullseye_${ARCH}.deb"; \
+      dpkg -i "wkhtmltox_${WKHTMLTOPDF_VERSION}.bullseye_${ARCH}.deb"; \
+    else \
+      wget "https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOPDF_VERSION}/wkhtmltox_${WKHTMLTOPDF_VERSION}.bookworm_${ARCH}.deb"; \
+      dpkg -i "wkhtmltox_${WKHTMLTOPDF_VERSION}.bookworm_${ARCH}.deb"; \
+    fi \
+;fi
 
 
 ###########################################################################
