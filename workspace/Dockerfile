@@ -8,6 +8,7 @@
 #
 # To change its version, see the available Tags on the Docker Hub:
 #    https://hub.docker.com/r/laradock/workspace/tags/
+
 #
 # Note: Base Image name format {image-tag}-{php-version}
 #
@@ -1292,7 +1293,7 @@ RUN if [ ${INSTALL_PG_CLIENT} = true ]; then \
     apt-get update && \
     apt-get -y install wget gnupg && \
     wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
-    echo "deb http://apt.postgresql.org/pub/repos/apt/ bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list && \
+    echo "deb http://apt.postgresql.org/pub/repos/apt/ focal-pgdg main" > /etc/apt/sources.list.d/pgdg.list
     apt-get update && \
     apt-get -y install postgresql-client-14 \
 ;fi
