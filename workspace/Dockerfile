@@ -1462,8 +1462,8 @@ RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
    xfonts-base \
    xfonts-75dpi \
    wget \
-   && wget "https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOPDF_VERSION}/wkhtmltox_${WKHTMLTOPDF_VERSION}.focal_${ARCH}.deb" \
-   && dpkg -i "wkhtmltox_${WKHTMLTOPDF_VERSION}.focal_${ARCH}.deb" \
+   && wget "https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOPDF_VERSION}/wkhtmltox_${WKHTMLTOPDF_VERSION}.buster_${ARCH}.deb" \
+   && dpkg -i "wkhtmltox_${WKHTMLTOPDF_VERSION}.buster_${ARCH}.deb" \
    && apt -f install \
 ;fi
 
