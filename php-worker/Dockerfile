@@ -99,6 +99,11 @@ RUN if [ ${INSTALL_GD} = true ]; then \
   docker-php-ext-install gd \
   ;fi
 
+
+RUN  apk add --update --no-cache php-fpm \
+  && docker-php-ext-install ftp \
+  ;fi
+
 #Install ImageMagick:
 ARG INSTALL_IMAGEMAGICK=false
 ARG IMAGEMAGICK_VERSION=latest
