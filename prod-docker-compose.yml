@@ -440,3 +440,5 @@ services:
 volumes:
   e86d9ed87dfef5f84cbc0fc7d2cec9d6dc6652ea64712c844085145c054163f1:
     external: true
+  docker-in-docker:
+    external: true
