@@ -16,6 +16,10 @@ volumes:
     driver: ${VOLUMES_DRIVER}
   elasticsearch:
     driver: ${VOLUMES_DRIVER}
+  mongo:
+    driver: ${VOLUMES_DRIVER}
+  e86d9ed87dfef5f84cbc0fc7d2cec9d6dc6652ea64712c844085145c054163f1:
+      external: true
 
 services:
 
@@ -544,7 +548,18 @@ services:
       depends_on:
         - elasticsearch
 
-volumes:
-  e86d9ed87dfef5f84cbc0fc7d2cec9d6dc6652ea64712c844085145c054163f1:
-    external: true
-  docker-in-docker:
+
+    ### MongoDB ##############################################
+    mongo:
+      restart: always
+      build: ./mongo
+      ports:
+        - "${MONGODB_PORT}:27017"
+      environment:
+        - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+        - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      volumes:
+        - ${DATA_PATH_HOST}/mongo:/data/db
+        - ${DATA_PATH_HOST}/mongo_config:/data/configdb
+      networks:
+        - backend
