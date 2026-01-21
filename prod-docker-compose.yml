@@ -14,6 +14,8 @@ volumes:
     driver: ${VOLUMES_DRIVER}
   docker-in-docker:
     driver: ${VOLUMES_DRIVER}
+  elasticsearch:
+    driver: ${VOLUMES_DRIVER}
 
 services:
 
@@ -439,6 +441,108 @@ services:
       networks:
         - frontend
         - backend
+
+  ### Graylog #######################################
+    graylog:
+      restart: always
+      build: ./graylog
+      environment:
+        - GRAYLOG_PASSWORD_SECRET=${GRAYLOG_PASSWORD}
+        - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_SHA256_PASSWORD}
+        - GRAYLOG_HTTP_EXTERNAL_URI=http://127.0.0.1:${GRAYLOG_PORT}/
+      links:
+        - mongo
+        - elasticsearch
+      depends_on:
+        - mongo
+        - elasticsearch
+      ports:
+        # Graylog web interface and REST API
+        - ${GRAYLOG_PORT}:9000
+        # Syslog TCP
+        - ${GRAYLOG_SYSLOG_TCP_PORT}:514
+        # Syslog UDP
+        - ${GRAYLOG_SYSLOG_UDP_PORT}:514/udp
+        # GELF TCP
+        - ${GRAYLOG_GELF_TCP_PORT}:12201
+        # GELF UDP
+        - ${GRAYLOG_GELF_UDP_PORT}:12201/udp
+      user: graylog
+      volumes:
+        - ${DATA_PATH_HOST}/graylog:/usr/share/graylog/data
+      networks:
+        - backend
+
+    ### Kibana ##############################################
+    kibana:
+      restart: always
+      build:
+        context: ./kibana
+        args:
+          - ELK_VERSION=${ELK_VERSION}
+      ports:
+        - "${KIBANA_HTTP_PORT}:5601"
+      depends_on:
+        - elasticsearch
+      networks:
+        - frontend
+        - backend
+
+   ### ElasticSearch ########################################
+    elasticsearch:
+      restart: always
+      build:
+        context: ./elasticsearch
+        args:
+          - ELK_VERSION=${ELK_VERSION}
+      volumes:
+        - elasticsearch:/usr/share/elasticsearch/data
+      environment:
+        - cluster.name=laradock-cluster
+        - node.name=laradock-node
+        - bootstrap.memory_lock=true
+        - xpack.security.enabled=false
+        - xpack.security.transport.ssl.enabled=false
+        - indices.id_field_data.enabled=true
+        - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+        - cluster.initial_master_nodes=laradock-node
+      ulimits:
+        memlock:
+          soft: -1
+          hard: -1
+        nofile:
+          soft: 65536
+          hard: 65536
+      ports:
+        - "${ELASTICSEARCH_HOST_HTTP_PORT}:9200"
+        - "${ELASTICSEARCH_HOST_TRANSPORT_PORT}:9300"
+      depends_on:
+        - php-fpm
+      networks:
+        - frontend
+        - backend
+
+    ### Logstash ##############################################
+    logstash:
+      restart: always
+      build:
+        context: ./logstash
+        args:
+          - ELK_VERSION=${ELK_VERSION}
+      volumes:
+        - './logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml'
+        - './logstash/pipeline:/usr/share/logstash/pipeline'
+      ports:
+        - '5001:5001'
+      environment:
+        LS_JAVA_OPTS: '-Xmx1g -Xms1g'
+      env_file:
+        - .env
+      networks:
+        - frontend
+        - backend
+      depends_on:
+        - elasticsearch
 
 volumes:
   e86d9ed87dfef5f84cbc0fc7d2cec9d6dc6652ea64712c844085145c054163f1:
