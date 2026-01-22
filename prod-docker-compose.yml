@@ -574,3 +574,6 @@ services:
         - /var/run/docker.sock:/var/run/docker.sock
         - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
       command: filebeat -e
+      networks:
+        - frontend
+        - backend
