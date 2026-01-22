@@ -564,3 +564,13 @@ services:
         - ${DATA_PATH_HOST}/mongo_config:/data/configdb
       networks:
         - backend
+
+
+    filebeat:
+      image: docker.elastic.co/beats/filebeat:7.9.1
+      user: root
+      volumes:
+        - /var/lib/docker/containers:/var/lib/docker/containers:ro
+        - /var/run/docker.sock:/var/run/docker.sock
+        - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      command: filebeat -e
