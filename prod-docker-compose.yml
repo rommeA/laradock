@@ -536,6 +536,7 @@ services:
       volumes:
         - './logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml'
         - './logstash/pipeline:/usr/share/logstash/pipeline'
+        - '/var/log/nginx:/var/log/nginx:ro'
       ports:
         - '5001:5001'
       environment:
