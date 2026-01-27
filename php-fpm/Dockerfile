@@ -193,6 +193,7 @@ RUN if [ ${INSTALL_PGSQL} = true ]; then \
 
 ARG INSTALL_PG_CLIENT=false
 ARG INSTALL_POSTGIS=false
+ARG PG_CLIENT_VERSION
 
 RUN if [ ${INSTALL_PG_CLIENT} = true ]; then \
     apt-get install -yqq gnupg \
@@ -200,7 +201,7 @@ RUN if [ ${INSTALL_PG_CLIENT} = true ]; then \
     && echo "deb http://apt.postgresql.org/pub/repos/apt $VERSION_CODENAME-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
     && curl -sL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
     && apt-get update -yqq \
-    && apt-get install -yqq postgresql-client-12 postgis; \
+    && apt-get install -yqq postgresql-client-${PG_CLIENT_VERSION} postgis; \
     if [ ${INSTALL_POSTGIS} = true ]; then \
       apt-get install -yqq postgis; \
     fi \
@@ -218,10 +219,10 @@ RUN if [ ${INSTALL_XDEBUG} = true ]; then \
   # Install the xdebug extension
   # https://xdebug.org/docs/compat
   if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ] || { [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ] && { [ $(php -r "echo PHP_MINOR_VERSION;") = "4" ] || [ $(php -r "echo PHP_MINOR_VERSION;") = "3" ] ;} ;}; then \
-    if [ ${LARADOCK_PHP_VERSION} = "8.2" ]; then \
-      pecl install xdebug-3.2.0; \
+    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ]; then \
+      pecl install xdebug-3.5.0; \
     else \
-      pecl install xdebug-3.1.4; \
+      pecl install xdebug-3.1.6; \
     fi; \
   else \
     if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
@@ -305,6 +306,10 @@ RUN if [ ${INSTALL_PHPREDIS} = true ]; then \
     # Install Php Redis Extension
     if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
       pecl install -o -f redis-4.3.0; \
+    elif [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ] && { [ $(php -r "echo PHP_MINOR_VERSION;") = "0" ] || [ $(php -r "echo PHP_MINOR_VERSION;") = "1" ] ;}; then \
+      pecl install -o -f redis-5.3.7; \
+    elif [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ] && { [ $(php -r "echo PHP_MINOR_VERSION;") = "2" ] || [ $(php -r "echo PHP_MINOR_VERSION;") = "3" ] ;}; then \
+      pecl install -o -f redis-6.0.2; \
     else \
       pecl install -o -f redis; \
     fi \
@@ -328,6 +333,8 @@ RUN set -eux; \
         pecl install swoole-4.5.11; \
       elif [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ]; then \
         pecl install swoole-4.8.12; \
+      elif [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ] && [ $(php -r "echo PHP_MINOR_VERSION;") = "0" ]; then \
+        pecl install swoole-5.1.2; \
       else \
         pecl install swoole; \
       fi; \
@@ -363,10 +370,22 @@ RUN if [ ${INSTALL_MONGO} = true ]; then \
       docker-php-ext-enable mongo; \
       php -m | grep -oiE '^mongo$'; \
     else \
-      if [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ] && { [ $(php -r "echo PHP_MINOR_VERSION;") = "0" ] || [ $(php -r "echo PHP_MINOR_VERSION;") = "1" ] ;}; then \
-        pecl install mongodb-1.9.2; \
+      if [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ]; then \
+        if [ $(php -r "echo PHP_MINOR_VERSION;") = "0" ] || [ $(php -r "echo PHP_MINOR_VERSION;") = "1" ]; then \
+          pecl install mongodb-1.9.2; \
+        else \
+          if [ $(php -r "echo PHP_MINOR_VERSION;") = "4" ]; then \
+            pecl install mongodb-1.20.1; \
+          else \
+            pecl install mongodb-1.16.2; \
+          fi; \
+        fi; \
       else \
-        pecl install mongodb; \
+        if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ] && [ $(php -r "echo PHP_MINOR_VERSION;") = "0" ]; then \
+            pecl install mongodb-1.20.1; \
+        else \
+            pecl install mongodb; \
+        fi; \
       fi; \
       docker-php-ext-enable mongodb; \
       php -m | grep -oiE '^mongodb$'; \
@@ -422,8 +441,12 @@ RUN set -eux; \
     if [ ${INSTALL_AMQP} = true ]; then \
       # # Install the amqp extension
       apt-get -yqq install librabbitmq-dev; \
-      if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ]; then \
-        pecl install amqp-1.11.0beta; \
+      if [ ${LARADOCK_PHP_VERSION} = "7.3" ] \
+        || [ ${LARADOCK_PHP_VERSION} = "7.2" ] \
+        || [ ${LARADOCK_PHP_VERSION} = "7.1" ] \
+        || [ ${LARADOCK_PHP_VERSION} = "7.0" ] \
+        || [ ${LARADOCK_PHP_VERSION} = "5.6" ]; then \
+        pecl install amqp-1.11.0; \
       else \
         pecl install amqp; \
       fi; \
@@ -636,6 +659,8 @@ RUN if [ ${INSTALL_OCI8} = true ]; then \
       echo 'instantclient,/opt/oracle/instantclient_${ORACLE_INSTANT_CLIENT_VERSION}/' | pecl install oci8-2.2.0; \
     elif [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ] && [ $(php -r "echo PHP_MINOR_VERSION;") = "0" ]; then \
       echo "instantclient,/opt/oracle/instantclient_${ORACLE_INSTANT_CLIENT_VERSION}/" | pecl install oci8-3.0.1; \
+    elif [ $(php -r "echo PHP_MAJOR_VERSION . PHP_MINOR_VERSION;") = "81" ]; then \
+        echo "instantclient,/opt/oracle/instantclient_${ORACLE_INSTANT_CLIENT_VERSION}/" | pecl install oci8-3.2.1; \
     else \
       echo "instantclient,/opt/oracle/instantclient_${ORACLE_INSTANT_CLIENT_VERSION}/" | pecl install oci8; \
     fi \
@@ -654,7 +679,8 @@ RUN if [ ${INSTALL_OCI8} = true ]; then \
 ARG INSTALL_IONCUBE=false
 
 RUN if [ ${INSTALL_IONCUBE} = true ]; then \
-    if [ $(php -r "echo PHP_MAJOR_VERSION;") != "8" ]; then \
+    if [ ${LARADOCK_PHP_VERSION} != "8.5" ] \
+      && [ ${LARADOCK_PHP_VERSION} != "8.0" ]; then \
       # Install the php ioncube loader
       curl -L -o /tmp/ioncube_loaders_lin_x86-64.tar.gz https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz \
       && tar zxpf /tmp/ioncube_loaders_lin_x86-64.tar.gz -C /tmp \
@@ -750,10 +776,14 @@ RUN set -eux; \
       # Add Microsoft repo for Microsoft ODBC Driver 13 for Linux \
       apt-get update \
       && apt-get install -yqq apt-transport-https gnupg lsb-release \
-      && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-      && curl https://packages.microsoft.com/config/debian/$(lsb_release -rs)/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+      && if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ] && [ ${LARADOCK_PHP_VERSION} != "8.0" ]; then \
+        curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg \
+      ;else \
+        curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+      ;fi \
+      && curl https://packages.microsoft.com/config/debian/$(if [ "$(lsb_release -rs)" = "13" ]; then echo "12"; else lsb_release -rs; fi)/prod.list > /etc/apt/sources.list.d/mssql-release.list \
       && apt-get update -yqq \
-      && ACCEPT_EULA=Y apt-get install -yqq unixodbc unixodbc-dev libgss3 odbcinst msodbcsql17 locales \
+      && ACCEPT_EULA=Y apt-get install -yqq unixodbc unixodbc-dev libgss3 odbcinst msodbcsql18 locales \
       && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
       && ln -sfn /etc/locale.alias /usr/share/locale/locale.alias \
       && locale-gen \
@@ -763,6 +793,14 @@ RUN set -eux; \
         pecl install pdo_sqlsrv-5.6.1 sqlsrv-5.6.1 \
       ;elif [ $(php -r "echo PHP_VERSION_ID - PHP_RELEASE_VERSION;") = "70200" ]; then \
         pecl install pdo_sqlsrv-5.8.1 sqlsrv-5.8.1 \
+      ;elif [ $(php -r "echo PHP_VERSION_ID - PHP_RELEASE_VERSION;") = "70300" ]; then \
+        pecl install pdo_sqlsrv-5.9.0 sqlsrv-5.9.0 \
+      ;elif [ $(php -r "echo PHP_VERSION_ID - PHP_RELEASE_VERSION;") = "70400" ]; then \
+        pecl install pdo_sqlsrv-5.10.1 sqlsrv-5.10.1 \
+      ;elif [ $(php -r "echo PHP_VERSION_ID - PHP_RELEASE_VERSION;") = "80000" ]; then \
+        pecl install pdo_sqlsrv-5.11.1 sqlsrv-5.11.1 \
+      ;elif [ $(php -r "echo PHP_MAJOR_VERSION;") = 8 ] && [ $(php -r "echo PHP_MINOR_VERSION;") -le 3 ]; then \
+        pecl install pdo_sqlsrv-5.12.0 sqlsrv-5.12.0 \
       ;else \
         pecl install pdo_sqlsrv sqlsrv \
       ;fi \
@@ -795,6 +833,7 @@ ARG IMAGEMAGICK_VERSION=latest
 ENV IMAGEMAGICK_VERSION ${IMAGEMAGICK_VERSION}
 
 RUN if [ ${INSTALL_IMAGEMAGICK} = true ]; then \
+    apt-get update && \
     apt-get install -yqq libmagickwand-dev imagemagick && \
     if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ]; then \
       cd /tmp && \
@@ -827,7 +866,11 @@ ARG INSTALL_SMB=false
 
 RUN if [ ${INSTALL_SMB} = true ]; then \
     apt-get install -yqq smbclient libsmbclient-dev coreutils && \
-    pecl install smbclient && \
+    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ]; then \
+        pecl install smbclient; \
+    else \
+        pecl install smbclient-1.1.2; \
+    fi && \
     docker-php-ext-enable smbclient \
 ;fi
 
@@ -837,11 +880,13 @@ RUN if [ ${INSTALL_SMB} = true ]; then \
 
 ARG INSTALL_IMAP=false
 
-RUN if [ ${INSTALL_IMAP} = true ]; then \
+RUN if [ "$INSTALL_IMAP" = "true" ]; then \
+  if [ "$(lsb_release -rs)" != "13" ]; then \
     apt-get install -yqq libc-client-dev libkrb5-dev && \
     docker-php-ext-configure imap --with-kerberos --with-imap-ssl && \
-    docker-php-ext-install imap \
-;fi
+    docker-php-ext-install imap; \
+  fi; \
+fi
 
 ###########################################################################
 # Calendar:
@@ -1006,6 +1051,7 @@ USER root
 ARG INSTALL_FFMPEG=false
 
 RUN if [ ${INSTALL_FFMPEG} = true ]; then \
+    apt-get update -y && \
     apt-get -y install ffmpeg \
 ;fi
 
@@ -1030,6 +1076,16 @@ RUN if [ ${INSTALL_AUDIOWAVEFORM} = true ]; then \
    && make install \
 ;fi
 
+#####################################
+# poppler-utils:
+#####################################
+USER root
+
+ARG INSTALL_POPPLER_UTILS=false
+
+RUN if [ ${INSTALL_POPPLER_UTILS} = true ]; then \
+  apt-get -y install poppler-utils antiword \
+;fi
 
 #####################################
 # wkhtmltopdf:
@@ -1073,7 +1129,6 @@ RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
     fi \
 ;fi
 
-
 #####################################
 # trader:
 #####################################
@@ -1108,9 +1163,9 @@ ARG INSTALL_CACHETOOL=false
 
 RUN if [ ${INSTALL_CACHETOOL} = true ]; then \
     if [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ] && [ $(php -r "echo PHP_MINOR_VERSION;") -ge 1 ]; then \
-            curl -sO http://gordalina.github.io/cachetool/downloads/cachetool.phar; \
+            curl -sO https://gordalina.github.io/cachetool/downloads/cachetool.phar; \
     else \
-        curl http://gordalina.github.io/cachetool/downloads/cachetool-3.2.1.phar -o cachetool.phar; \
+        curl https://gordalina.github.io/cachetool/downloads/cachetool-3.2.1.phar -o cachetool.phar; \
     fi && \
     chmod +x cachetool.phar && \
     mv cachetool.phar /usr/local/bin/cachetool \
@@ -1141,15 +1196,24 @@ USER root
 ARG INSTALL_PHPDECIMAL=false
 
 RUN if [ ${INSTALL_PHPDECIMAL} = true ]; then \
-    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
-      echo 'decimal not support PHP 5.6'; \
+  if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
+    echo 'decimal not support PHP 5.6'; \
+  else \
+    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ] && \
+        [ ${LARADOCK_PHP_VERSION} != "8.0" ]; then \
+      curl -L -o /tmp/mpdecimal.tar.gz "https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-2.5.1.tar.gz"; \
+      mkdir -p /tmp/mpdecimal; \
+      tar -C /tmp/mpdecimal -zxvf /tmp/mpdecimal.tar.gz --strip 1; \
+      cd /tmp/mpdecimal; \
+      ./configure && make && make install; \
     else \
-      apt-get install -yqq libmpdec-dev \
-      && pecl install decimal \
-      && docker-php-ext-enable decimal \
-      && php -m | grep -q 'decimal' \
-    ;fi \
-;fi
+      apt-get install -yqq libmpdec-dev; \
+    fi; \
+    pecl install decimal; \
+    docker-php-ext-enable decimal; \
+    php -m | grep -oiE '^decimal$'; \
+  fi; \
+fi
 
 ###########################################################################
 # zookeeper
@@ -1183,8 +1247,8 @@ ARG NEW_RELIC=${NEW_RELIC}
 ARG NEW_RELIC_KEY=${NEW_RELIC_KEY}
 ARG NEW_RELIC_APP_NAME=${NEW_RELIC_APP_NAME}
 
-RUN if [ ${NEW_RELIC} = true ]; then \
-  curl -L http://download.newrelic.com/php_agent/release/newrelic-php5-9.18.1.303-linux.tar.gz | tar -C /tmp -zx && \
+RUN if [ ${NEW_RELIC} = true ] ]; then \
+  curl -L http://download.newrelic.com/php_agent/archive/10.15.0.4/newrelic-php5-10.15.0.4-linux.tar.gz | tar -C /tmp -zx && \
   export NR_INSTALL_USE_CP_NOT_LN=1 && \
   export NR_INSTALL_SILENT=1 && \
   /tmp/newrelic-php5-*/newrelic-install install && \
@@ -1223,6 +1287,20 @@ RUN set -xe; \
     && rm /tmp/ssdb-client-php.tar.gz \
     && docker-php-ext-enable ssdb \
 ;fi
+
+###########################################################################
+# Legacy Openssl Config:
+###########################################################################
+ARG LEGACY_OPENSSL=false
+
+RUN if [ ${LEGACY_OPENSSL} = true ]; then \
+  if openssl version | grep -q "OpenSSL 3"; then \
+    sed -i 's/# providers = provider_sect/providers = provider_sect/g' /etc/ssl/openssl.cnf && \
+    sed -i '$a[provider_sect]\ndefault=default_sect\nlegacy=legacy_sect\n' /etc/ssl/openssl.cnf && \
+    sed -i '$a[default_sect]\nactivate=1\n[legacy_sect]\nactivate=1\n' /etc/ssl/openssl.cnf \
+  ;fi \
+;fi
+
 ###########################################################################
 # Downgrade Openssl:
 ###########################################################################
@@ -1302,6 +1380,16 @@ RUN if [ ${INSTALL_DNSUTILS} = true ]; then \
 ;fi
 
 ###########################################################################
+# GraphViz extension
+###########################################################################
+
+ARG INSTALL_GRAPHVIZ=false
+
+RUN if [ ${INSTALL_GRAPHVIZ} = true ]; then \
+    apt-get install -yqq graphviz \
+;fi
+
+###########################################################################
 # Check PHP version:
 ###########################################################################
 
@@ -1321,7 +1409,7 @@ USER root
 # Clean up
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    rm /var/log/lastlog /var/log/faillog
+    rm -f /var/log/lastlog /var/log/faillog
 
 # Configure non-root user.
 ARG PUID=1000
