@@ -214,6 +214,15 @@ COPY ./crontab /etc/cron.d
 RUN chmod -R 644 /etc/cron.d
 
 ###########################################################################
+# Certificate Authorities
+###########################################################################
+
+USER root
+
+COPY ./ca-certificates/* /usr/local/share/ca-certificates/
+RUN update-ca-certificates
+
+###########################################################################
 # Drush:
 ###########################################################################
 
@@ -1533,7 +1542,7 @@ RUN if [ ${INSTALL_POPPLER_UTILS} = true ]; then \
 USER root
 
 ARG INSTALL_WKHTMLTOPDF=false
-ARG WKHTMLTOPDF_VERSION=0.12.6-1
+ARG WKHTMLTOPDF_VERSION=0.12.6.1-3
 
 RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
    ARCH=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) \
@@ -1548,8 +1557,8 @@ RUN if [ ${INSTALL_WKHTMLTOPDF} = true ]; then \
    xfonts-base \
    xfonts-75dpi \
    wget \
-   && wget "https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb" \
-   && dpkg -i "wkhtmltox_0.12.6-1.focal_amd64.deb" \
+   && wget "https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOPDF_VERSION}/wkhtmltox_${WKHTMLTOPDF_VERSION}.jammy_${ARCH}.deb" \
+   && dpkg -i "wkhtmltox_${WKHTMLTOPDF_VERSION}.jammy_${ARCH}.deb" \
    && apt -f install \
 ;fi
 
