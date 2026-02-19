@@ -286,6 +286,7 @@ services:
         - backend
       links:
         - docker-in-docker
+      restart: unless-stopped
         
 
 ### PHP Worker ############################################
@@ -341,6 +342,7 @@ services:
         - "dockerhost:${DOCKER_HOST_IP}"
       networks:
         - backend
+      restart: unless-stopped
 
 ### NGINX Server #########################################
     nginx:
@@ -369,6 +371,7 @@ services:
         - backend
       dns:
         - 10.10.25.9
+      restart: unless-stopped
 
 ### PostgreSQL ###########################################
     postgres:
@@ -403,6 +406,7 @@ services:
         - POSTGRES_CONFLUENCE_PASSWORD=${CONFLUENCE_POSTGRES_PASSWORD}
       networks:
         - backend
+      restart: unless-stopped
 
 ### pgAdmin ##############################################
     pgadmin:
@@ -437,6 +441,7 @@ services:
         - 2375
       networks:
         - backend
+      restart: unless-stopped
 
   ### Mailhog ################################################
     mailhog:
