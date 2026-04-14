@@ -86,5 +86,5 @@ def main():
         logger.error(f"Ошибка БД: {e}")
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
