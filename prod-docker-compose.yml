@@ -408,6 +408,21 @@ services:
         - backend
       restart: unless-stopped
 
+
+    ais-processor:
+      build:
+        context: python
+        dockerfile: Dockerfile
+      container_name: ais-processor
+      restart: unless-stopped
+      depends_on:
+        - postgres
+      environment:
+        DB_HOST: '${DB_HOST}'
+        DB_DATABASE: '${DB_DATABASE}'
+        DB_USERNAME: '${DB_USERNAME}'
+        DB_PASSWORD: '${DB_PASSWORD}'
+
 ### pgAdmin ##############################################
     pgadmin:
       image: dpage/pgadmin4:latest
