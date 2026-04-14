@@ -417,6 +417,8 @@ services:
       restart: unless-stopped
       depends_on:
         - postgres
+      networks:
+        - backend
       environment:
         DB_HOST: '${DB_HOST}'
         DB_DATABASE: '${DB_DATABASE}'
