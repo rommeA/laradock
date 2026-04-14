@@ -1,0 +1,3 @@
+pyais
+psycopg2-binary
+asyncio
