@@ -9,7 +9,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 # Копируем скрипт
-COPY app.py .
 COPY office.py .
 
 # Запускаем скрипт
